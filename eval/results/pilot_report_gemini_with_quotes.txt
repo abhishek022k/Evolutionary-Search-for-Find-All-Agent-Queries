@@ -1,0 +1,48 @@
+filings: 200, labeled: 163, failed: 37
+failure types: {'http_503': 4, 'http_429': 33}
+average tokens per filing: 25,472 in, 79 out
+spent: $1.06; a full 3000-filing run at this rate: $15.86
+
+stay_home_boom: 12/163 yes (7.4%), 95% range 4.3-12.4%, quotes not found in filing: 0
+  quote sections: Item 7 9, Item 1A 3, both 0, not found 0; available in Item 7: 75%; if this question wins: keep both sections
+  1065332_2020: In addition, the pandemic and the need to socially distance pushed more businesses and citizens online to interact with governments digitally, instead of in government offices, which increased the usage of many digital s
+  1418091_2020: Following the start of the pandemic, we saw increased use of Twitter as people sought to stay informed and connect with others
+  829224_2020: Our Channel Development segment continues to grow category share as customers adjust to their at-home routines.
+  1084384_2020: The number of companies whose employees are working remotely as a result of the COVID-19 pandemic and the resulting government-ordered shutdowns has caused use of our platform to increase.
+  1320695_2020: Consumers have modified their purchasing habits to more food-at-home in response to the pandemic.
+  57515_2020: With respect to our Retail segment, the impact of COVID-19 resulted in higher sales during the three months ended June 30, 2020 as consumer demand in the retail channel remained elevated.
+  88948_2020: To date we have seen increased customer and consumer demand for our products as the COVID-19 pandemic reached the United States and consumers began pantry loading and increasing their at-home consumption as a result of i
+  1328581_2020: In addition, we have had strong demand from our home center customers in response to elevated repair and remodel and "do-it-yourself" activity as people are spending more time at home during the pandemic.
+  1065837_2020: Consumers have gravitated towards comfort in their lives as people are predominately working from home and increasingly focused on their well-being.
+  50725_2020: CPP revenue in 2020 increased $138,625, or 14%, compared to 2019, primarily from a 12% increase in volume, due to increased consumer demand for home improvement initiatives across most of our geographic regions supplemen
+  66004_2020: usage by residential customers has increased due to remote working arrangements
+  1415404_2020: Additionally, many of our subscribers are working remotely or engaging in distance learning. These activities have increased the usage on our HughesNet service so that there is little or no capacity remaining for subscri
+
+new_offering: 20/163 yes (12.3%), 95% range 8.1-18.2%, quotes not found in filing: 1
+  quote sections: Item 7 16, Item 1A 3, both 0, not found 1; available in Item 7: 84%; if this question wins: switch to Item 7 only
+  1032220_2020: In fiscal year 2020, the segment further executed on its clinical evolution strategy by expanding its clinical offerings in public health with new work in contact tracing, disease investigation, and COVID-19 response eff
+  1060219_2020: The Bank has applied Section 4013 guidance and implemented a loan payment deferral program which allows residential, commercial and consumer borrowers, who have been adversely affected by the virus and whose loans were n
+  1065332_2020: In August 2020, we began offering new rapid and secure COVID-19 testing solution TourHealth, featuring digital engagement, assessment and scheduling, as well as in-person clinical testing and logistics.
+  1458412_2020: The Bank provided PPP loans to support current customers and foster relationships with new customers.
+  1156039_2020: We remain focused on increasing access and coverage for our members and made several changes to our membership benefits and business operations, adopted tools and policies to assist consumers and care providers and provi
+  1795139_2020: In all locations where applicable regulations limiting in-store retail activity have been enacted by governmental authorities, the Company has expanded consumer delivery options and curbside pickup to help further protec
+  829224_2020: increasing the scale of the Starbucks store footprint with disciplined global expansion and introducing flexible and unique store formats, including the accelerated development of alternative store formats (such as Starb
+  1071739_2020: We have extended coverage of COVID-19 screening, testing and treatment services for Medicaid, Medicare and Marketplace members and are waiving all associated member cost share amounts.
+  1674930_2020: In 2020, we developed and began offering a series of COVID-19 tests, but the pricing and margins from these tests continue to evolve.
+  59478_2020 [QUOTE NOT FOUND]: In response to the COVID-19 pandemic, we have been focused on ... developing treatments for COVID-19
+  1411579_2020: We also introduced AMC Private Screening, which allows moviegoers to reserve a separate AMC Safe & Clean auditorium for a private screening for up to 20 people, starting at $99 plus tax.
+  1116463_2020: During 2020, we began selling our saliva collection devices for use in molecular COVID-19 testing.
+  1359687_2020: Approximately 3.9% of our ethanol sales were from industrial alcohol sales made during our 2020 fiscal year due to shortages experienced early in the COVID-19 pandemic.
+  1053691_2020: In early April 2020, we announced plans to initiate a clinical research program to evaluate TSC in patients with COVID-19
+  1041514_2020: During April 2020, we developed a system to grant loans to repeat customers using mobile phone-based USSD strings, and this was launched through targeted SMS marketing in early May 2020.
+  1065837_2020: To further enhance our consumer shopping experience, we began implementing a new point of sale system in our domestic retail locations, introduced a new website and mobile application suite, and made enhancements to our 
+  1514946_2020: Additionally, our COVID-19 related product candidates, including our lateral flow diagnostic test for SARS-CoV-2 neutralizing antibodies, are subject to uncertainties relating to product development, regulatory approval 
+  1617406_2020: We continue to proactively pursue alternative sources of revenue from applicable government authorities and hospitals, such as providing temporary lodging for first responders, other medical personnel, military personnel
+  832489_2020: During January 2020, we began a program to develop a vaccine for prevention of novel coronavirus (COVID-19) infection.
+  1366744_2020: Our primary capital projects during our 2020 fiscal year were additional grain storage, additional distillation, installation of industrial grade alcohol production process and some other operating upgrades.
+
+panic_buying: 3/163 yes (1.8%), 95% range 0.6-5.3%, quotes not found in filing: 1
+  quote sections: Item 7 1, Item 1A 1, both 0, not found 1; available in Item 7: 50%; if this question wins: keep both sections (fewer than 5 usable yes quotes)
+  88948_2020: To date we have seen increased customer and consumer demand for our products as the COVID-19 pandemic reached the United States and consumers began pantry loading and increasing their at-home consumption as a result of i
+  1024305_2020 [QUOTE NOT FOUND]: Significant reductions in demand or significant volatility in demand for one or more of our products, which may be caused by, among other things: ... or stockpiling or similar activity
+  884269_2020: decreased demand from some distributors and their ultimate consumers in light of high levels of stockpiled inventory, resulting from a rush to obtain face masks in the early months of the pandemic
