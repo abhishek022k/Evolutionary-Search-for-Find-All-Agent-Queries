@@ -15,7 +15,7 @@
   "chunk_overlap": 50,
   "embedding_model": "BAAI/bge-small-en-v1.5",
   "index_dir": "index/full",
-  "index_type": "hnsw",
+  "index_type": "flat",
   "hnsw_m": 32,
   "ef_construction": 200,
   "ef_search": 2500,
