@@ -3,19 +3,24 @@
 QUESTIONS = {
     "stay_home_boom": {
         "question": (
-            "Does the filing state that consumers' pandemic lifestyle changes, such "
-            "as spending more time at home or taking up home, hobby or outdoor "
-            "activities, increased demand for the company's products or services?"
+            "Does the filing state that individual consumers' pandemic lifestyle "
+            "changes, such as spending more time at home or taking up home, hobby or "
+            "outdoor activities, led them to buy or use more of the company's products "
+            "or services?"
         ),
         "yes": (
-            "The company reports this actually happened, and links the demand to how "
-            "consumers changed their behavior. Example: \"Sales of bicycles surged as "
-            "families sought outdoor activities during lockdowns.\""
+            "The company reports this actually happened, and says individuals or "
+            "households bought or used more because of how their daily life changed. "
+            "Buying more and using more both count. Remote work or distance learning "
+            "counts only when individuals or households are the ones using more. "
+            "Example: \"Sales of bicycles surged as families sought outdoor activities "
+            "during lockdowns.\""
         ),
         "no": (
             "Hypothetical language (\"could increase\"). Stay-at-home orders that closed "
-            "stores or hurt the business. Increased orders from business customers. A "
-            "demand increase with no stated link to consumer behavior."
+            "stores or hurt the business. Businesses, governments or other organizations "
+            "buying or using more, even if their staff worked remotely. Higher demand "
+            "with no stated link to how consumers changed their behavior."
         ),
     },
     "new_offering": {
