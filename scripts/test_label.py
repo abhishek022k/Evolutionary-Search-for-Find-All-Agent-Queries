@@ -31,7 +31,8 @@ class FakeMessages:
 
     async def create(self, **kwargs):
         self.calls += 1
-        assert kwargs["thinking"] == {"type": "disabled"}
+        assert kwargs["thinking"] == {"type": "adaptive"}
+        assert kwargs["output_config"]["effort"] == "low"
         schema = kwargs["output_config"]["format"]["schema"]
         assert schema["required"] == QIDS
         text, stop = self.script(self.calls)
@@ -209,6 +210,21 @@ def test_gemini_retries_rate_limits_then_gives_up():
 def test_gemini_cut_off_answer_is_an_error():
     row = label_gemini(FakeGeminiModels(finish=gtypes.FinishReason.MAX_TOKENS))
     assert row["error"].startswith("stop_reason:") and "labels" not in row
+
+
+def test_recheck_selects_only_yes_filings():
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "labels.jsonl")
+        rows_out = [
+            {"filing_id": "1_2020", "labels": {"q": {"answer": True}}},
+            {"filing_id": "2_2020", "labels": {"q": {"answer": False}}},
+            {"filing_id": "3_2020", "error": "http_429"},
+            {"filing_id": "4_2020", "error": "http_429"},
+            {"filing_id": "4_2020", "labels": {"q": {"answer": True}}},
+        ]
+        with open(path, "w") as f:
+            f.writelines(json.dumps(r) + "\n" for r in rows_out)
+        assert label.yes_filing_ids(path, "q") == {"1_2020", "4_2020"}
 
 
 def test_stops_after_repeated_failures():
