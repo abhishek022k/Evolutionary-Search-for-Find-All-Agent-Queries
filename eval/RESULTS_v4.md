@@ -34,6 +34,23 @@ Every run starts from the same six hand-written Generation 0 queries and the sam
 | `v4_sonnet_s4004` | sonnet 5.5 | 4004 | 109 | 0.845 | 8 | $0.1198 |
 | `v4_sonnet_s4005` | sonnet 5.5 | 4005 | 115 | 0.891 | 8 | $0.1204 |
 
+## Evolution against the baselines
+
+Relevant filings found after the same number of judgments, out of 129. Each baseline runs Generation 0 queries with no evolving: it merges their rankings with reciprocal rank fusion and judges down the merged list. Baselines use no LLM and no randomness, so each is a single run. Evolution rows show the mean, then the range across seeds.
+
+| Arm | 100 | 200 | 300 | 500 | 750 | 1,000 |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline: all six queries (hybrid) | 35 | 48 | 58 | 73 | 86 | 101 |
+| Baseline: BM25 queries only | 25 | 35 | 47 | 66 | 87 | 101 |
+| Baseline: embedding queries only | 27 | 42 | 52 | 71 | 85 | 96 |
+| Baseline: exact-phrase queries only | 10 | 10 | 10 | 10 | 10 | 10 |
+| Evolution: opus 5.5 | 22.0 (22-22) | 49.2 (48-50) | 62.2 (60-65) | 81.8 (78-85) | 96.4 (93-101) | 106.6 (101-114) |
+| Evolution: sonnet 5.5 | 22.0 (22-22) | 44.6 (40-47) | 59.8 (58-63) | 83.0 (79-88) | 100.4 (93-106) | 110.8 (103-115) |
+
+At 1,000 judgments the hybrid baseline finds 101. Of 10 evolution runs, 9 finished above it, 1 level with it and 0 below it. Each evolution run found 12-20 relevant filings the hybrid baseline missed, and missed 5-13 that it found.
+
+Baseline: exact-phrase queries only stopped after 13 judgments because its queries match no more filings.
+
 ## Breeder comparison
 
 | Breeder | Runs | Found (mean) | SD | Range | Recall (mean) | Cost/run |

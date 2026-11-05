@@ -1,0 +1,13 @@
+{"seq": 1, "filing_id": "1695295_2020", "relevant": true, "query_id": "q6", "generation": 0, "via": "baseline", "best_rank": 2, "sampled": false}
+{"seq": 2, "filing_id": "1103982_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 1, "sampled": false}
+{"seq": 3, "filing_id": "1533998_2020", "relevant": false, "query_id": "q6", "generation": 0, "via": "baseline", "best_rank": 1, "sampled": false}
+{"seq": 4, "filing_id": "1328581_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 2, "sampled": false}
+{"seq": 5, "filing_id": "1576940_2020", "relevant": false, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 4, "sampled": false}
+{"seq": 6, "filing_id": "1593001_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 5, "sampled": false}
+{"seq": 7, "filing_id": "1800227_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 9, "sampled": false}
+{"seq": 8, "filing_id": "1825088_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 10, "sampled": false}
+{"seq": 9, "filing_id": "317540_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 13, "sampled": false}
+{"seq": 10, "filing_id": "55785_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 17, "sampled": false}
+{"seq": 11, "filing_id": "77360_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 18, "sampled": false}
+{"seq": 12, "filing_id": "923571_2020", "relevant": false, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 20, "sampled": false}
+{"seq": 13, "filing_id": "945841_2020", "relevant": true, "query_id": "q5", "generation": 0, "via": "baseline", "best_rank": 21, "sampled": false}
