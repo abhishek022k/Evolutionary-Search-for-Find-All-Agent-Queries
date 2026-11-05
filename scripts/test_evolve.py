@@ -23,11 +23,23 @@ WORDS = ["home", "demand", "consumer", "outdoor", "bicycle", "pandemic", "retail
          "supply", "revenue", "segment", "hobby", "lockdown"]
 
 
+class FakeEmbedder:
+    """One dimension, so a chunk's vector is just its position in the index."""
+
+    dim = 1
+
+    def encode_queries(self, texts):
+        return [[1.0] for _ in texts]
+
+    encode_chunks = encode_queries
+
+
 class FakeEngine:
     """Deterministic stand-in. Relevant filings cluster in index space so that
     vector amplify has something real to find."""
 
     def __init__(self, n=N_FILINGS):
+        self.embedder = FakeEmbedder()
         self.filing_ids = [f"F{i:04d}" for i in range(n)]
         self.cfg = {"search_k": 200, "index_type": "flat"}
         self._text, self._chunks, self._position = {}, {}, {}
@@ -208,7 +220,46 @@ def main():
     kept, _ = elites_for(0, 0)
     ok &= check("a fully exhausted branch yields its slot", kept == [], f"kept {kept}")
 
-    # 10. helper
+    # 10. amplify must pick distinctive wording, not boilerplate
+    print("amplify word queries")
+
+    class PhraseEngine(FakeEngine):
+        """Every filing carries the same boilerplate. Two also carry a rare phrase."""
+
+        def __init__(self):
+            super().__init__(n=60)
+            boiler = ("the company reported strong financial condition during the "
+                      "period and results may vary ")
+            rare = "backyard grill sales surged "
+            for i, filing_id in enumerate(self.filing_ids):
+                for chunk_id in self._chunks[filing_id]:
+                    self._text[chunk_id] = boiler * 6 + (rare * 4 if i < 2 else "")
+
+    tmp6 = fresh_dir()
+    engine = PhraseEngine()
+    cfg = {"search_k": 50, "judge_depth": 5, "amplify_cap": 5, "amplify_k": 20,
+           "elites_per_branch": 1, "seed": 7, "max_generations": 2}
+    run = EvolutionRun(engine, {f: False for f in engine.filing_ids}, engine.filing_ids,
+                       cfg, StubBreeder(), tmp6, 10, "q", seed=7, verbose=False)
+    # 3 found filings: all carry the boilerplate, only 2 carry the rare phrase, so a
+    # scorer that counts recurrence alone picks the boilerplate.
+    out = run.word_queries(["F0000", "F0001", "F0002"])
+    run.finish()
+    shutil.rmtree(tmp6, ignore_errors=True)
+    exact = [q for branch, q in out if branch == "exact"]
+    ok &= check("amplify prefers the rare phrase",
+                any("backyard" in q for q in exact), f"got {exact}")
+    boiler_words = set("the company reported strong financial condition during the "
+                       "period and results may vary".split())
+    ok &= check("amplify returns no phrase built from the boilerplate",
+                not any(set(q.split()) <= boiler_words for q in exact), f"got {exact}")
+    from evolve import lift
+    ok &= check("lift: wording in every filing scores about chance",
+                0.8 < lift(30, 31, 290, 300) < 1.2, f"{lift(30, 31, 290, 300):.2f}")
+    ok &= check("lift: wording only found filings use scores high",
+                lift(4, 31, 0, 300) > 10, f"{lift(4, 31, 0, 300):.2f}")
+
+    # 11. helper
     hits = [("c2", "F2", 5), ("c1", "F1", 1), ("c3", "F1", 9)]
     ok &= check("best_chunk_per_filing picks the best rank",
                 best_chunk_per_filing(hits) == {"F1": "c1", "F2": "c2"})

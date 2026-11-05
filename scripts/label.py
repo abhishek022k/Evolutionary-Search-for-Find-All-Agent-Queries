@@ -33,6 +33,9 @@ LABELS_GLOB = "data/processed/labels_*.jsonl"
 # Dollars per million tokens: (input, output) for prompts up to and above 100K tokens.
 PRICES = {
     "claude-haiku-5-5": ((0.10, 0.50), (0.50, 2.50)),
+    # Breeder models. Sonnet 5.5 has no separate long-prompt tier.
+    "claude-sonnet-5-5": ((2.00, 10.00), (2.00, 10.00)),
+    "claude-opus-5-5": ((4.00, 20.00), (4.00, 20.00)),
     # Valid through 2026-12-31; Google lists double these rates from 2027-01-01.
     "gemini-3.6-flash": ((0.75, 3.75), (0.75, 3.75)),
     "gemini-2.5-flash-lite": ((0.10, 0.40), (0.10, 0.40)),
@@ -262,7 +265,7 @@ async def run(args, client, filings, out_path):
     failures = 0
     finished = 0
     start = time.time()
-    state = {"spent": spent, "stop": False, "failures_in_a_row": 0}
+    state = {"spent": spent, "stop": False, "failures_in_a_row": 0, "limit": limit}
 
     with open(out_path, "a") as out:
         async def worker(index):
@@ -286,10 +289,15 @@ async def run(args, client, filings, out_path):
                     state["stop"] = True
                     print(f"{MAX_FAILURES_IN_A_ROW} failures in a row. Stopping. Last error: "
                           f"{row['error']}: {row.get('error_message', '')}")
-                if state["spent"] >= limit and not state["stop"]:
+                if state["spent"] >= state["limit"] and not state["stop"]:
                     state["stop"] = True
-                    print(f"Spending limit of ${limit:.2f} reached. Stopping.")
+                    print(f"Spending limit of ${state['limit']:.2f} reached. Stopping.")
                 if finished % 25 == 0 or finished == len(todo):
+                    # Re-read what other labels files hold. Read once at the start, a
+                    # second labelling run started meanwhile would be invisible and both
+                    # runs would spend the full total_budget.
+                    state["limit"] = min(args.max_spend,
+                                         CONFIG["total_budget"] - spent_elsewhere(out_path))
                     rate = finished / max(time.time() - start, 1) * 60
                     print(f"  {finished}/{len(todo)} done, {failures} failed, "
                           f"${state['spent']:.2f}, {rate:.0f} per minute", flush=True)

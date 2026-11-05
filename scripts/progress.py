@@ -9,9 +9,11 @@ import json
 import os
 import time
 
-PATH = "data/processed/labels_full_stay_home_boom_claude-haiku-5-5.jsonl"
-QUESTION = "stay_home_boom"
-TOTAL = 3000
+CONFIG = json.load(open("config.json"))
+# From the config, so labelling a different question does not silently show the old run.
+PATH = CONFIG["labels_path"]
+QUESTION = CONFIG["question_id"]
+TOTAL = CONFIG["n_filings"]
 WIDTH = 40
 
 
@@ -42,12 +44,17 @@ def render():
         print(f"Last saved: {last:%H:%M:%S}")
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--watch", action="store_true")
-args = parser.parse_args()
-while True:
-    render()
-    if not args.watch:
-        break
-    time.sleep(30)
-    print()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--watch", action="store_true")
+    args = parser.parse_args()
+    while True:
+        render()
+        if not args.watch:
+            break
+        time.sleep(30)
+        print()
+
+
+if __name__ == "__main__":
+    main()

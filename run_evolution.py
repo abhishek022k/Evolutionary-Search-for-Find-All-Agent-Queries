@@ -74,6 +74,7 @@ def main():
     p.add_argument("--stub", action="store_true", help="Deterministic breeder, no API calls.")
     p.add_argument("--max-generations", type=int)
     p.add_argument("--seed", type=int)
+    p.add_argument("--breeder-model", help="Override breeder_model, for the breeder ablation.")
     p.add_argument("--judge-depth", type=int, help="Override judge_depth, for tests and sweeps.")
     p.add_argument("--amplify-cap", type=int, help="Override amplify_cap.")
     p.add_argument("--run-id")
@@ -85,6 +86,8 @@ def main():
                          ".env.example), or pass --stub to run without a breeder.")
 
     cfg = json.load(open(args.config))
+    if args.breeder_model:
+        cfg["breeder_model"] = args.breeder_model
     if args.judge_depth is not None:
         cfg["judge_depth"] = args.judge_depth
     if args.amplify_cap is not None:
@@ -113,7 +116,7 @@ def main():
 
     run_id = args.run_id or f"evolution_{time.strftime('%Y%m%d_%H%M%S')}"
     log_dir = os.path.join("eval", "runs", run_id)
-    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(log_dir)  # fails on a reused run id, before run_meta.json is overwritten
 
     cost = CostTracker()
     breeder = make_breeder(cfg, cost, stub=args.stub)
