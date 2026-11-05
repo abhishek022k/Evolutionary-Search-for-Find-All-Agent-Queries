@@ -303,7 +303,8 @@ class EvolutionRun:
 
     # -- step 5: breed ------------------------------------------------------
 
-    def _excerpts(self, filing_ids, limit, width=260):
+    # Wide enough for a whole chunk: the relevant wording is rarely near the start.
+    def _excerpts(self, filing_ids, limit, width=2000):
         out = []
         for filing_id in filing_ids[:limit]:
             text = " ".join(self._filing_text(filing_id, max_chunks=1).split())

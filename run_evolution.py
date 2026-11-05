@@ -113,7 +113,7 @@ def main():
 
     run_id = args.run_id or f"evolution_{time.strftime('%Y%m%d_%H%M%S')}"
     log_dir = os.path.join("eval", "runs", run_id)
-    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(log_dir)  # fails on a reused run id, before run_meta.json is overwritten
 
     cost = CostTracker()
     breeder = make_breeder(cfg, cost, stub=args.stub)
