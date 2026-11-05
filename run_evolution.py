@@ -74,6 +74,7 @@ def main():
     p.add_argument("--stub", action="store_true", help="Deterministic breeder, no API calls.")
     p.add_argument("--max-generations", type=int)
     p.add_argument("--seed", type=int)
+    p.add_argument("--breeder-model", help="Override breeder_model, for the breeder ablation.")
     p.add_argument("--judge-depth", type=int, help="Override judge_depth, for tests and sweeps.")
     p.add_argument("--amplify-cap", type=int, help="Override amplify_cap.")
     p.add_argument("--run-id")
@@ -85,6 +86,8 @@ def main():
                          ".env.example), or pass --stub to run without a breeder.")
 
     cfg = json.load(open(args.config))
+    if args.breeder_model:
+        cfg["breeder_model"] = args.breeder_model
     if args.judge_depth is not None:
         cfg["judge_depth"] = args.judge_depth
     if args.amplify_cap is not None:

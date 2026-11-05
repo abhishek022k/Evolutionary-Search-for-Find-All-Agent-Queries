@@ -33,6 +33,9 @@ LABELS_GLOB = "data/processed/labels_*.jsonl"
 # Dollars per million tokens: (input, output) for prompts up to and above 100K tokens.
 PRICES = {
     "claude-haiku-5-5": ((0.10, 0.50), (0.50, 2.50)),
+    # Breeder models. Sonnet 5.5 has no separate long-prompt tier.
+    "claude-sonnet-5-5": ((2.00, 10.00), (2.00, 10.00)),
+    "claude-opus-5-5": ((4.00, 20.00), (4.00, 20.00)),
     # Valid through 2026-12-31; Google lists double these rates from 2027-01-01.
     "gemini-3.6-flash": ((0.75, 3.75), (0.75, 3.75)),
     "gemini-2.5-flash-lite": ((0.10, 0.40), (0.10, 0.40)),

@@ -208,4 +208,8 @@ class LLMBreeder:
 def make_breeder(cfg, cost_tracker, stub=False):
     if stub:
         return StubBreeder(seed=cfg.get("seed", 0))
-    return LLMBreeder(cfg["breeder_model"], cost_tracker)
+    # Thinking tokens count toward max_tokens, and effort defaults differ by model
+    # (Haiku 5.5 medium, Sonnet 5.5 high), so leave headroom or a reply gets cut off
+    # mid-JSON and the breeder falls back to stub mutations.
+    return LLMBreeder(cfg["breeder_model"], cost_tracker,
+                      max_tokens=cfg.get("breeder_max_tokens", 8000))
