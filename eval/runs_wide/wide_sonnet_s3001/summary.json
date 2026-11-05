@@ -1,0 +1,21 @@
+{
+  "generations": 8,
+  "judgments_used": 1000,
+  "found": 116,
+  "relevant_in_scope": 129,
+  "recall": 0.8992248062015504,
+  "ledger": {
+    "found": 116,
+    "rejected": 884,
+    "seen_unjudged": 1757,
+    "untouched": 243
+  },
+  "breeding_cost": {
+    "calls": 7,
+    "input_tokens": 46584,
+    "output_tokens": 2549,
+    "dollars": 0.118658,
+    "unpriced_calls": 0
+  },
+  "breeder_fallbacks": 0
+}

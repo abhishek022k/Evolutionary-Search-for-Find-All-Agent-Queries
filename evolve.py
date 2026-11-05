@@ -11,8 +11,8 @@ Keeping an elite is not wasteful: top_unjudged skips anything already judged, so
 re-run elite moves deeper into its own ranking and its fitness decays as it exhausts
 its neighbourhood. The population prunes dead directions without an explicit rule.
 
-This module takes the engine as an argument and never imports search itself, so it
-stays pure stdlib and can be tested with no index and no torch.
+This module takes the engine as an argument and never imports search itself, so the
+tests run with no index and no torch. numpy is used only for one dot product.
 """
 import json
 import math
@@ -20,6 +20,8 @@ import os
 import random
 import re
 from collections import Counter
+
+import numpy
 
 from judge import BudgetExhausted, Judge
 from ledger import Ledger, first_rank_per_filing
@@ -36,6 +38,31 @@ where which who whom why will with would year years you your
 # A hyphen or apostrophe must be followed by more letters, so "covid-" tokenizes as
 # "covid". Trailing punctuation inside a phrase makes exact-match queries miss.
 TOKEN = re.compile(r"[a-z]+(?:['\-][a-z]+)*")
+
+
+def lift(found_count, n_found, bg_df, bg_docs):
+    """How much more common this wording is among the filings we found than in the
+    collection at large. 1.0 means no better than chance.
+
+    Counting recurrence alone picks boilerplate, because "financial condition"
+    recurs in every filing we found and in every filing we did not. Weighting a
+    count by rarity does not fix it either: a phrase in 26 of 31 found filings
+    still outscores a rare one. A ratio of rates does, and needs no magic cap.
+    """
+    return (found_count / n_found) / ((bg_df + 1) / bg_docs)
+
+
+def phrases_in(words, sizes=(2, 3, 4)):
+    """The distinct 2 to 4 word phrases in one document, ignoring ones that start
+    or end on a stopword. A set, so a phrase counts once per document."""
+    out = set()
+    for size in sizes:
+        for i in range(len(words) - size + 1):
+            gram = words[i:i + size]
+            if gram[0] in STOPWORDS or gram[-1] in STOPWORDS:
+                continue
+            out.add(" ".join(gram))
+    return out
 
 
 # --------------------------------------------------------------------------- queries
@@ -87,8 +114,10 @@ class EvolutionRun:
         self.exhausted = False
 
         self.best_chunk = {}          # filing_id -> chunk id, for amplify seeding
+        self._qvec = None             # the embedded question, computed once
         self._stub = None             # lazy StubBreeder, tops up a short generation
-        self._bg_df = None            # background document frequencies, computed once
+        self._bg_df = None            # background frequencies, computed once
+        self._bg_phrase_df = None
         self._bg_docs = 0
         self.generations = []
         self._query_log = open(os.path.join(log_dir, "queries.jsonl"), "x")
@@ -100,8 +129,13 @@ class EvolutionRun:
         if self.verbose:
             print(message, flush=True)
 
-    def _observe(self, hits, query_id, generation):
-        self.ledger.observe(hits, query_id, generation)
+    def _observe(self, hits, query_id, generation, record=True):
+        """record=False for amplify's vector searches: they start from a filing we
+        already know is relevant, so their ranks say nothing about what a written
+        query reached. Letting them set best_rank would make unreached filings look
+        nearly reached, which is what near_miss() pools are built from."""
+        if record:
+            self.ledger.observe(hits, query_id, generation)
         for filing_id, chunk_id in best_chunk_per_filing(hits).items():
             self.best_chunk.setdefault(filing_id, chunk_id)
 
@@ -115,14 +149,28 @@ class EvolutionRun:
                 result["new_found"] += 1
                 result["found_ids"].append(filing_id)
 
-    def _filing_text(self, filing_id, max_chunks=2):
+    def _question_vector(self):
+        if self._qvec is None:
+            self._qvec = numpy.asarray(
+                self.engine.embedder.encode_queries([self.question])[0], dtype="float32")
+        return self._qvec
+
+    def _filing_text(self, filing_id):
+        """The one chunk of this filing closest in meaning to the question.
+
+        Not the chunk the query matched. That is circular: it hands back the words we
+        already searched with, which is why mining it produced "risks and uncertainties
+        described". Measured on generation 0, the chunk holding the labeller's evidence
+        quote was the top-ranked chunk for 1 filing out of 31.
+
+        shortcut: one chunk, so evidence spread across chunks is missed. Revisit when a
+        real LLM judge reports which snippet it approved.
+        """
         chunk_ids = self.engine.chunks_of(filing_id)
         if not chunk_ids:
             return ""
-        best = self.best_chunk.get(filing_id)
-        ordered = ([best] + [c for c in chunk_ids if c != best]) if best in chunk_ids \
-            else chunk_ids
-        return " ".join(self.engine.get_text(c) for c in ordered[:max_chunks])
+        sims = numpy.asarray(self.engine.get_vectors(chunk_ids)) @ self._question_vector()
+        return self.engine.get_text(chunk_ids[int(numpy.argmax(sims))])
 
     # -- step 1: search -----------------------------------------------------
 
@@ -161,49 +209,54 @@ class EvolutionRun:
     # -- step 2: amplify ----------------------------------------------------
 
     def _background_df(self, sample_size=300):
-        """Document frequencies over a random sample, so 'distinctive' means something."""
+        """Document frequencies over a random sample, so 'distinctive' means something.
+
+        Phrases need this as much as words do: wording like "financial condition"
+        recurs in every filing we find and in every filing we do not.
+        """
         if self._bg_df is not None:
-            return self._bg_df, self._bg_docs
+            return self._bg_df, self._bg_phrase_df, self._bg_docs
         sample = self.rng.sample(self.filing_ids, min(sample_size, len(self.filing_ids)))
-        df = Counter()
+        df, phrase_df = Counter(), Counter()
         docs = 0
         for filing_id in sample:
-            text = self._filing_text(filing_id, max_chunks=1)
+            text = self._filing_text(filing_id)   # same rule as the foreground
             if not text:
                 continue
             docs += 1
-            df.update(set(TOKEN.findall(text.lower())) - STOPWORDS)
-        self._bg_df, self._bg_docs = df, max(docs, 1)
-        return self._bg_df, self._bg_docs
+            words = TOKEN.findall(text.lower())
+            df.update(set(words) - STOPWORDS)
+            phrase_df.update(phrases_in(words))
+        self._bg_df, self._bg_phrase_df, self._bg_docs = df, phrase_df, max(docs, 1)
+        return self._bg_df, self._bg_phrase_df, self._bg_docs
 
     def word_queries(self, found_ids, max_terms=8):
         """Distinctive terms and repeated phrases from confirmed finds -> new queries."""
-        texts = [self._filing_text(f, max_chunks=1) for f in found_ids]
+        texts = [self._filing_text(f) for f in found_ids]
         texts = [t.lower() for t in texts if t]
         if len(texts) < 2:
             return []
         fg = Counter()
         for text in texts:
             fg.update(set(TOKEN.findall(text)) - STOPWORDS)
-        bg_df, bg_docs = self._background_df()
-        scored = {term: count * math.log(1 + bg_docs / (1 + bg_df.get(term, 0)))
-                  for term, count in fg.items() if count >= 2}
+        bg_df, bg_phrase_df, bg_docs = self._background_df()
+        # With enough found filings, insist on three before believing a word matters,
+        # so two coincidentally similar filings cannot set the next query.
+        floor = 3 if len(texts) >= 10 else 2
+        scored = {term: lift(count, len(texts), bg_df.get(term, 0), bg_docs)
+                  for term, count in fg.items() if count >= floor}
         terms = [t for t, _ in sorted(scored.items(), key=lambda kv: (-kv[1], kv[0]))][:max_terms]
 
-        # Phrases that recur across filings are what the exact branch is good at.
+        # Phrases that recur across found filings AND are rare elsewhere are what the
+        # exact branch is good at. Without the background term, boilerplate wins:
+        # "financial condition" recurs in every filing in the corpus.
         phrase_docs = Counter()
         for text in texts:
-            words = [w for w in TOKEN.findall(text)]
-            seen = set()
-            for size in (2, 3, 4):
-                for i in range(len(words) - size + 1):
-                    gram = words[i:i + size]
-                    if gram[0] in STOPWORDS or gram[-1] in STOPWORDS:
-                        continue
-                    seen.add(" ".join(gram))
-            phrase_docs.update(seen)
-        phrases = [p for p, c in sorted(phrase_docs.items(), key=lambda kv: (-kv[1], kv[0]))
-                   if c >= 2][:2]
+            phrase_docs.update(phrases_in(TOKEN.findall(text)))
+        phrase_scored = {p: lift(c, len(texts), bg_phrase_df.get(p, 0), bg_docs)
+                         for p, c in phrase_docs.items() if c >= floor}
+        phrases = [p for p, _ in sorted(phrase_scored.items(),
+                                        key=lambda kv: (-kv[1], kv[0]))][:2]
 
         out = []
         if terms:
@@ -249,7 +302,7 @@ class EvolutionRun:
             hits = self.engine.search_by_vector(vector, k=amp_k)
             result["by_vector_seeds"] += 1
             result["hits"] += len(hits)
-            self._observe(hits, result["query_id"] + "-vec", generation)
+            self._observe(hits, result["query_id"] + "-vec", generation, record=False)
             absorb(hits)
 
         # (b) more like this, by words: distinctive terms and repeated phrases
@@ -307,7 +360,7 @@ class EvolutionRun:
     def _excerpts(self, filing_ids, limit, width=2000):
         out = []
         for filing_id in filing_ids[:limit]:
-            text = " ".join(self._filing_text(filing_id, max_chunks=1).split())
+            text = " ".join(self._filing_text(filing_id).split())
             if text:
                 out.append(text[:width])
         return out

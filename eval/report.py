@@ -12,7 +12,7 @@ import argparse
 import os
 import statistics as st
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -23,8 +23,13 @@ BAR = "█"
 CHECKPOINTS = (100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
 
 
-def load_runs(runs_dir):
-    """Every finished full-collection evolution run, newest config wins ties."""
+def load_runs(runs_dir, commit=None):
+    """Every finished full-collection evolution run, from one version of the code.
+
+    Runs made before and after a change to the search or breeding code are not
+    comparable, so averaging them together would quietly produce a meaningless
+    number. run_meta.json records the commit; we refuse to mix them.
+    """
     out = []
     for name in sorted(os.listdir(runs_dir)):
         path = os.path.join(runs_dir, name)
@@ -32,12 +37,22 @@ def load_runs(runs_dir):
         summary = read_json(os.path.join(path, "summary.json"))
         if not meta or not summary or meta.get("arm") != "evolution" or meta.get("pilot"):
             continue
+        if commit and not meta.get("git_commit", "").startswith(commit):
+            continue
         out.append({
             "name": name, "meta": meta, "summary": summary,
             "generations": read_jsonl(os.path.join(path, "generations.jsonl")),
             "queries": read_jsonl(os.path.join(path, "queries.jsonl")),
             "judgments": read_jsonl(os.path.join(path, "judgments.jsonl")),
         })
+    commits = {r["meta"].get("git_commit") or "unknown" for r in out}
+    if len(commits) > 1:
+        counts = Counter(r["meta"].get("git_commit") or "unknown" for r in out)
+        listing = "\n".join(f"  {c[:12]}  {n} run{'s' if n != 1 else ''}"
+                             for c, n in counts.most_common())
+        raise SystemExit(
+            f"{runs_dir} holds runs from {len(commits)} different commits:\n{listing}\n"
+            f"They are not comparable. Pass --commit <sha> to pick one.")
     return out
 
 
@@ -45,7 +60,7 @@ def short(model):
     return model.replace("claude-", "").replace("-5-5", " 5.5")
 
 
-def curve(judgments, relevant_total):
+def curve(judgments):
     found, by_seq = 0, {}
     for row in sorted(judgments, key=lambda r: r["seq"]):
         found += bool(row["relevant"])
@@ -118,6 +133,8 @@ def section_breeder(runs, lines):
                  if r["summary"]["breeding_cost"]["dollars"]]
         mean, sd = fmt_stats(found)
         cost_cell = f"${st.mean(costs):.4f}" if costs else "-"
+        if costs and len(costs) != len(group):  # unpriced runs are left out of the mean
+            cost_cell += f" ({len(costs)} of {len(group)} priced)"
         lines += [f"| {short(model)} | {len(group)} | **{mean}** | {sd} | "
                   f"{min(found)}-{max(found)} | {st.mean(found) / total:.3f} | "
                   f"{cost_cell} |"]
@@ -171,7 +188,7 @@ def section_curve(runs, lines):
     total = runs[0]["meta"]["relevant_in_scope"]
     by_model = defaultdict(list)
     for r in runs:
-        by_model[r["meta"]["breeder"]].append(curve(r["judgments"], total))
+        by_model[r["meta"]["breeder"]].append(curve(r["judgments"]))
     lines += ["## Recall against judgments spent", ""]
     for model in sorted(by_model):
         curves = by_model[model]
@@ -254,9 +271,10 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--runs-dir", default="eval/runs")
     p.add_argument("--out", default="eval/RESULTS.md")
+    p.add_argument("--commit", help="Only runs whose git_commit starts with this.")
     args = p.parse_args()
 
-    runs = load_runs(args.runs_dir)
+    runs = load_runs(args.runs_dir, args.commit)
     if not runs:
         raise SystemExit(f"no finished evolution runs in {args.runs_dir}")
 

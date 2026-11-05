@@ -94,7 +94,15 @@ with tempfile.TemporaryDirectory() as shared_dir:
         assert ENGINE.search("bm25", "") == []
 
     def test_embedding_reaches_planted_filing():
-        assert filings(ENGINE.search("embedding", "zygomorphic tractors", k=5))[0] == "2_2020"
+        # Flat, because config.json is flat and HNSW makes no exact-rank promise. On
+        # this 82-chunk fixture HNSW never returns 2_2020 at k=5, and ranks it 22nd
+        # even when asked for all 82 chunks. On the real 270k collection HNSW is fine
+        # (B measured 0.997 mean recall), so this is a fixture-scale effect.
+        with tempfile.TemporaryDirectory() as d:
+            cfg = make_cfg(d, index_type="flat")
+            build(cfg)
+            engine = SearchEngine(cfg, embedder=HashEmbedder())
+            assert filings(engine.search("embedding", "zygomorphic tractors", k=5))[0] == "2_2020"
 
     def test_every_branch_gives_contiguous_ranks_and_repeatable_results():
         for branch, query in (("bm25", "company market"), ("embedding", "company market"),
@@ -115,13 +123,24 @@ with tempfile.TemporaryDirectory() as shared_dir:
         assert set(BRANCHES) == {"bm25", "embedding", "exact"}
 
     def test_vector_rows_line_up_with_chunk_ids():
+        # Alignment holds for any index type, so check it on the shared engine.
         for chunk_id in ("2_2020#item_1a#0000", "6_2020#item_7#0000", "9_2020#item_7#0001"):
             vector = ENGINE.get_vectors([chunk_id])[0]
             expected = HashEmbedder().encode_chunks([ENGINE.get_text(chunk_id)])[0]
             assert np.allclose(vector, expected), chunk_id
-            assert ENGINE.search_by_vector(vector, k=1)[0][2] == 1
-        unique = ENGINE.get_vectors(["2_2020#item_1a#0000"])[0]
-        assert ENGINE.search_by_vector(unique, k=1)[0][0] == "2_2020#item_1a#0000"
+
+        # Searching with a chunk's own vector must return that chunk. Only exact search
+        # promises this, and config.json is flat. HNSW on this 82-chunk fixture returns
+        # a different chunk for 2_2020, whose planted words make it an outlier the graph
+        # never reaches. amplify() relies on this, so it is worth pinning down.
+        with tempfile.TemporaryDirectory() as d:
+            cfg = make_cfg(d, index_type="flat")
+            build(cfg)
+            engine = SearchEngine(cfg, embedder=HashEmbedder())
+            for chunk_id in ("2_2020#item_1a#0000", "6_2020#item_7#0000"):
+                vector = engine.get_vectors([chunk_id])[0]
+                hit = engine.search_by_vector(vector, k=1)[0]
+                assert hit[0] == chunk_id and hit[2] == 1, chunk_id
 
     def test_helpers_for_amplify_and_filings_with_no_chunks():
         assert ENGINE.chunks_of("6_2020") == ["6_2020#item_1a#0000", "6_2020#item_7#0000"]
@@ -226,9 +245,17 @@ with tempfile.TemporaryDirectory() as shared_dir:
             engine = SearchEngine(cfg, embedder=HashEmbedder())
             assert filings(engine.search("embedding", "zygomorphic tractors", k=5))[0] == "2_2020"
 
+    failed = []
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
-            fn()
-            print("passed:", name)
+            try:
+                fn()
+            except AssertionError as error:
+                failed.append(name)
+                print("FAILED:", name, error)
+            else:
+                print("passed:", name)
 
+if failed:
+    sys.exit(f"{len(failed)} of the tests failed: {', '.join(failed)}")
 print("all tests passed")
