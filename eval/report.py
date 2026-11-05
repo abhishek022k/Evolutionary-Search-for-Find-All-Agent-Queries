@@ -21,6 +21,12 @@ from qualitative import origin_of, read_json, read_jsonl, report_branches  # noq
 
 BAR = "█"
 CHECKPOINTS = (100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+MATCHED = (100, 200, 300, 500, 750, 1000)
+# Run directories are baseline_<key>; baseline.py writes no run_meta.json, so name them here.
+BASELINES = (("hybrid", "Baseline: all six queries (hybrid)"),
+             ("bm25", "Baseline: BM25 queries only"),
+             ("faiss", "Baseline: embedding queries only"),
+             ("grep", "Baseline: exact-phrase queries only"))
 
 
 def load_runs(runs_dir, commit=None):
@@ -66,6 +72,11 @@ def curve(judgments):
         found += bool(row["relevant"])
         by_seq[row["seq"]] = found
     return by_seq
+
+
+def found_at(by_seq, n):
+    """Found after n judgments. A run that stopped early keeps its last count."""
+    return by_seq.get(n) or max((v for k, v in by_seq.items() if k <= n), default=0)
 
 
 def bar(value, biggest, width=34):
@@ -114,6 +125,57 @@ def section_results(runs, lines):
         lines += [f"| `{r['name']}` | {short(m['breeder'])} | {m['seed']} | "
                   f"{s['found']} | {s['recall']:.3f} | {s['generations']} | {cost_text} |"]
     lines.append("")
+
+
+def section_baselines(runs, lines, runs_dir):
+    """Evolution against the same Generation 0 queries with no evolving."""
+    logs = {key: read_jsonl(os.path.join(runs_dir, f"baseline_{key}", "judgments.jsonl"))
+            for key, _ in BASELINES}
+    if not logs["hybrid"]:
+        print(f"no baseline_hybrid in {runs_dir}, leaving the baseline comparison out")
+        return
+    budget = runs[0]["meta"]["budget"]
+    points = [n for n in MATCHED if n <= budget]
+    lines += ["## Evolution against the baselines", "",
+              "Relevant filings found after the same number of judgments, out of "
+              f"{runs[0]['meta']['relevant_in_scope']}. Each baseline runs Generation 0 "
+              "queries with no evolving: it merges their rankings with reciprocal rank "
+              "fusion and judges down the merged list. Baselines use no LLM and no "
+              "randomness, so each is a single run. Evolution rows show the mean, then "
+              "the range across seeds.", "",
+              "| Arm | " + " | ".join(f"{n:,}" for n in points) + " |",
+              "|---|" + "---:|" * len(points)]
+    for key, label in BASELINES:
+        if logs[key]:
+            by_seq = curve(logs[key])
+            lines += [f"| {label} | " +
+                      " | ".join(str(found_at(by_seq, n)) for n in points) + " |"]
+    by_model = defaultdict(list)
+    for r in runs:
+        by_model[r["meta"]["breeder"]].append(curve(r["judgments"]))
+    for model in sorted(by_model):
+        cells = []
+        for n in points:
+            vals = [found_at(c, n) for c in by_model[model]]
+            cells.append(f"{st.mean(vals):.1f} ({min(vals)}-{max(vals)})")
+        lines += [f"| Evolution: {short(model)} | " + " | ".join(cells) + " |"]
+    lines.append("")
+
+    target = found_at(curve(logs["hybrid"]), budget)
+    finals = [found_at(curve(r["judgments"]), budget) for r in runs]
+    hybrid = {j["filing_id"] for j in logs["hybrid"] if j["relevant"] and j["seq"] <= budget}
+    found = [{j["filing_id"] for j in r["judgments"] if j["relevant"]} for r in runs]
+    gained, lost = [len(f - hybrid) for f in found], [len(hybrid - f) for f in found]
+    lines += [f"At {budget:,} judgments the hybrid baseline finds {target}. Of "
+              f"{len(runs)} evolution runs, {sum(f > target for f in finals)} finished above "
+              f"it, {sum(f == target for f in finals)} level with it and "
+              f"{sum(f < target for f in finals)} below it. Each evolution run found "
+              f"{min(gained)}-{max(gained)} relevant filings the hybrid baseline missed, "
+              f"and missed {min(lost)}-{max(lost)} that it found.", ""]
+    for key, label in BASELINES:
+        if logs[key] and len(logs[key]) < budget:
+            lines += [f"{label} stopped after {len(logs[key])} judgments because its "
+                      "queries match no more filings.", ""]
 
 
 def section_breeder(runs, lines):
@@ -194,10 +256,7 @@ def section_curve(runs, lines):
         curves = by_model[model]
         lines += [f"**{short(model)}** (mean of {len(curves)} runs)", "", "```"]
         for n in CHECKPOINTS:
-            vals = []
-            for c in curves:
-                vals.append(c.get(n) or max((v for k, v in c.items() if k <= n), default=0))
-            mean = st.mean(vals)
+            mean = st.mean(found_at(c, n) for c in curves)
             lines += [f"{n:>5} judgments  {bar(mean, total):<34} "
                       f"{mean:5.1f} / {total}   recall {mean / total:.3f}"]
         lines += ["```", ""]
@@ -284,6 +343,7 @@ def main():
              f"Every number is read from the run logs._", ""]
     section_setup(runs, lines)
     section_results(runs, lines)
+    section_baselines(runs, lines, args.runs_dir)
     section_breeder(runs, lines)
     section_generations(runs, lines)
     section_curve(runs, lines)

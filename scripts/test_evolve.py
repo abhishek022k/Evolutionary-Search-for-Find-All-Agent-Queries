@@ -264,6 +264,41 @@ def main():
     ok &= check("best_chunk_per_filing picks the best rank",
                 best_chunk_per_filing(hits) == {"F1": "c1", "F2": "c2"})
 
+    # 12. the baseline comparison in the report
+    print("report")
+    sys.path.insert(0, os.path.join(ROOT, "eval"))
+    from report import section_baselines
+
+    def rows(*judged):
+        return [{"seq": seq, "filing_id": fid, "relevant": rel} for seq, fid, rel in judged]
+
+    runs_dir = tempfile.mkdtemp(prefix="report_test_")
+    # The row past the budget must not count, and grep stops early.
+    logs = {"hybrid": rows((1, "A", True), (2, "B", True), (3, "C", False), (101, "D", True)),
+            "grep": rows((1, "A", True))}
+    for key, judged in logs.items():
+        os.makedirs(os.path.join(runs_dir, f"baseline_{key}"))
+        with open(os.path.join(runs_dir, f"baseline_{key}", "judgments.jsonl"), "w") as f:
+            f.writelines(json.dumps(r) + "\n" for r in judged)
+    fake_run = {"meta": {"budget": 100, "relevant_in_scope": 5, "breeder": "claude-test"},
+                "judgments": rows((1, "B", True), (2, "E", True), (3, "X", False))}
+    out = []
+    section_baselines([fake_run], out, runs_dir)
+    text = "\n".join(out)
+    ok &= check("baseline row counts judgments up to the budget only",
+                "| Baseline: all six queries (hybrid) | 2 |" in text)
+    ok &= check("evolution row shows mean and range",
+                "| Evolution: test | 2.0 (2-2) |" in text)
+    ok &= check("win, tie and loss counts are right",
+                "0 finished above it, 1 level with it and 0 below it" in text)
+    ok &= check("filings gained and lost against hybrid are right",
+                "found 1-1 relevant filings the hybrid baseline missed, and missed 1-1" in text)
+    ok &= check("an early stop is reported", "stopped after 1 judgments" in text)
+    out = []
+    section_baselines([fake_run], out, tmp3)
+    ok &= check("no baseline logs leaves the section out", out == [])
+    shutil.rmtree(runs_dir, ignore_errors=True)
+
     for path in (tmp, tmp2, tmp3):
         shutil.rmtree(path, ignore_errors=True)
     print("\nALL PASS" if ok else "\nFAILURES ABOVE")
