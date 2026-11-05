@@ -38,7 +38,10 @@ with open(out_path, "w") as out:
                 only_a += la["answer"]
                 only_b += lb["answer"]
                 who = "A" if la["answer"] else "B"
-                out.write(f"{fid} yes from {who}: {yes['quote'][:300]}\n")
+                # Same marker summarize_labels.py uses: an unverified quote was not
+                # found in the filing, so it must not look confirmed to a human reader.
+                mark = "" if yes.get("quote_verified") else " [QUOTE NOT FOUND]"
+                out.write(f"{fid} yes from {who}{mark}: {yes['quote'][:300]}\n")
         n = len(shared)
         any_yes = both_yes + only_a + only_b
         overlap = both_yes / any_yes if any_yes else 0
