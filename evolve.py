@@ -286,8 +286,14 @@ class EvolutionRun:
             by_branch.setdefault(query.branch, []).append(query)
         elites = []
         for branch in sorted(by_branch):
+            # A query that spent nothing has no unjudged results left. It is exhausted,
+            # and since every exhausted query scores 0 it would win its branch on the
+            # tiebreak and hold the slot forever. Drop it and let the breeder have the
+            # slot instead: run() sizes the next batch from how many elites survive.
+            live = [q for q in by_branch[branch]
+                    if results[q.query_id]["judgments_spent"] > 0]
             ranked = sorted(
-                by_branch[branch],
+                live,
                 key=lambda q: (-self.fitness(results[q.query_id]),
                                -results[q.query_id]["new_found"], q.query_id))
             elites.extend(ranked[:keep_per_branch])

@@ -15,7 +15,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 from breeder import BRANCHES, StubBreeder, _clean, build_prompt  # noqa: E402
-from evolve import EvolutionRun, best_chunk_per_filing  # noqa: E402
+from evolve import EvolutionRun, Query, best_chunk_per_filing  # noqa: E402
 from ledger import Ledger  # noqa: E402
 
 N_FILINGS = 120
@@ -185,7 +185,30 @@ def main():
     ok &= check("prompt carries grep coaching", "SHORT IDIOMATIC" in prompt)
     ok &= check("prompt names the count", "exactly 3" in prompt)
 
-    # 9. helper
+    # 9. an exhausted query must not keep its elite slot forever
+    print("elite selection")
+
+    def elites_for(spent_a, spent_b):
+        tmp_dir = fresh_dir()
+        engine, labels, cfg, _ = make_setup()
+        run = EvolutionRun(engine, labels, engine.filing_ids, cfg, StubBreeder(),
+                           tmp_dir, 50, "q", seed=7, verbose=False)
+        population = [Query("a", "bm25", "x", 0, "gen0"),
+                      Query("b", "bm25", "y", 0, "gen0")]
+        results = {"a": {"judgments_spent": spent_a, "new_found": 0},
+                   "b": {"judgments_spent": spent_b, "new_found": 1}}
+        elites, dropped = run.select_elites(population, results)
+        run.finish()
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return [q.query_id for q in elites], [q.query_id for q in dropped]
+
+    kept, dropped = elites_for(0, 5)
+    ok &= check("a query that spent nothing is dropped", kept == ["b"], f"kept {kept}")
+    ok &= check("the exhausted query is reported as dropped", "a" in dropped)
+    kept, _ = elites_for(0, 0)
+    ok &= check("a fully exhausted branch yields its slot", kept == [], f"kept {kept}")
+
+    # 10. helper
     hits = [("c2", "F2", 5), ("c1", "F1", 1), ("c3", "F1", 9)]
     ok &= check("best_chunk_per_filing picks the best rank",
                 best_chunk_per_filing(hits) == {"F1": "c1", "F2": "c2"})
