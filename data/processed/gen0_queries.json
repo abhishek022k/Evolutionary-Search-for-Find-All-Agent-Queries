@@ -1,0 +1,8 @@
+[
+  {"query_id": "q1", "branch": "bm25", "query": "covid, hobby, lifestyle, increase"},
+  {"query_id": "q2", "branch": "bm25", "query": "lockdown, consumer, home, growth"},
+  {"query_id": "q3", "branch": "embedding", "query": "increased revenue due to COVID related consumer habits"},
+  {"query_id": "q4", "branch": "embedding", "query": "staying at home led to more orders"},
+  {"query_id": "q5", "branch": "exact", "query": "time at home"},
+  {"query_id": "q6", "branch": "exact", "query": "lifestyle changes"}
+]

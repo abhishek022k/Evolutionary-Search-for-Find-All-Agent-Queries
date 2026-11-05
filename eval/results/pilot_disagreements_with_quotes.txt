@@ -1,0 +1,29 @@
+
+=== stay_home_boom ===
+1065332_2020 yes from B: In addition, the pandemic and the need to socially distance pushed more businesses and citizens online to interact with governments digitally, instead of in government offices, which increased the usage of many digital services we manage on behalf of our government partners.
+1065837_2020 yes from B: Consumers have gravitated towards comfort in their lives as people are predominately working from home and increasingly focused on their well-being.
+1084384_2020 yes from B: The number of companies whose employees are working remotely as a result of the COVID-19 pandemic and the resulting government-ordered shutdowns has caused use of our platform to increase.
+1415404_2020 yes from B: Additionally, many of our subscribers are working remotely or engaging in distance learning. These activities have increased the usage on our HughesNet service so that there is little or no capacity remaining for subscriber growth in our most popular geographic areas.
+1418091_2020 yes from B: Following the start of the pandemic, we saw increased use of Twitter as people sought to stay informed and connect with others
+57515_2020 yes from B: With respect to our Retail segment, the impact of COVID-19 resulted in higher sales during the three months ended June 30, 2020 as consumer demand in the retail channel remained elevated.
+829224_2020 yes from B: Our Channel Development segment continues to grow category share as customers adjust to their at-home routines.
+
+=== new_offering ===
+1041514_2020 yes from B: During April 2020, we developed a system to grant loans to repeat customers using mobile phone-based USSD strings, and this was launched through targeted SMS marketing in early May 2020.
+1053691_2020 yes from B: In early April 2020, we announced plans to initiate a clinical research program to evaluate TSC in patients with COVID-19
+1065837_2020 yes from B: To further enhance our consumer shopping experience, we began implementing a new point of sale system in our domestic retail locations, introduced a new website and mobile application suite, and made enhancements to our omnichannel capabilities, including introducing features like buy online pick up
+1156039_2020 yes from B: We remain focused on increasing access and coverage for our members and made several changes to our membership benefits and business operations, adopted tools and policies to assist consumers and care providers and provided support to our associates and our local communities
+1309402_2020 yes from A: We have also upgraded our York facility to include USP grade alcohol capabilities
+1359687_2020 yes from B: Approximately 3.9% of our ethanol sales were from industrial alcohol sales made during our 2020 fiscal year due to shortages experienced early in the COVID-19 pandemic.
+1366744_2020 yes from B: Our primary capital projects during our 2020 fiscal year were additional grain storage, additional distillation, installation of industrial grade alcohol production process and some other operating upgrades.
+1411579_2020 yes from B: We also introduced AMC Private Screening, which allows moviegoers to reserve a separate AMC Safe & Clean auditorium for a private screening for up to 20 people, starting at $99 plus tax.
+1514946_2020 yes from B: Additionally, our COVID-19 related product candidates, including our lateral flow diagnostic test for SARS-CoV-2 neutralizing antibodies, are subject to uncertainties relating to product development, regulatory approval and commercialization
+1617406_2020 yes from B: We continue to proactively pursue alternative sources of revenue from applicable government authorities and hospitals, such as providing temporary lodging for first responders, other medical personnel, military personnel, displaced guests and residents of communities where our hotels are located, co
+1795139_2020 yes from B: In all locations where applicable regulations limiting in-store retail activity have been enacted by governmental authorities, the Company has expanded consumer delivery options and curbside pickup to help further protect the health and safety of Green Thumb employees and customers.
+832489_2020 yes from B: During January 2020, we began a program to develop a vaccine for prevention of novel coronavirus (COVID-19) infection.
+884269_2020 yes from A: We have experienced a significant surge in customer demand for our proprietary N-95 Particulate Respirator face mask product and other personal protective equipment (“PPE”) products as a result of COVID-19.
+
+=== panic_buying ===
+1024305_2020 yes from B: Significant reductions in demand or significant volatility in demand for one or more of our products, which may be caused by, among other things: ... or stockpiling or similar activity
+1359687_2020 yes from A: shortages experienced early in the COVID-19 pandemic
+884269_2020 yes from B: decreased demand from some distributors and their ultimate consumers in light of high levels of stockpiled inventory, resulting from a rush to obtain face masks in the early months of the pandemic

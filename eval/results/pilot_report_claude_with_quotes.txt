@@ -1,0 +1,35 @@
+filings: 200, labeled: 200, failed: 0
+average tokens per filing: 42,507 in, 71 out
+spent: $0.98; a full 3000-filing run at this rate: $14.76
+
+stay_home_boom: 7/200 yes (3.5%), 95% range 1.7-7.0%, quotes not found in filing: 1
+  quote sections: Item 7 4, Item 1A 2, both 0, not found 1; available in Item 7: 67%; if this question wins: keep both sections
+  50725_2020: primarily from a 12% increase in volume, due to increased consumer demand for home improvement initiatives across most of our geographic regions supplemented by COVID-19 stay at home orders
+  66004_2020: usage by residential customers has increased due to remote working arrangements
+  88948_2020: consumers began pantry loading and increasing their at-home consumption as a result of increased social distancing and stay-at-home mandates
+  910521_2020: strong sell-through of certain product lines, including the slipper category in general, as we believe consumers are seeking out luxurious comfort in the current work-from-home environment
+  1320695_2020: Consumers have modified their purchasing habits to more food-at-home in response to the pandemic.
+  1328581_2020 [QUOTE NOT FOUND]: our Building Materials Distribution segment... we have had strong demand from our home center customers in response to elevated repair and remodel and "do-it-yourself" activity as people are spending more time at home du
+  1753706_2020: consumer behaviors that have resulted from COVID-19 have increased overall demand for our Branded CPG products sold via retail or e-commerce channels
+
+new_offering: 13/200 yes (6.5%), 95% range 3.8-10.8%, quotes not found in filing: 2
+  quote sections: Item 7 10, Item 1A 1, both 0, not found 2; available in Item 7: 91%; if this question wins: switch to Item 7 only
+  59478_2020 [QUOTE NOT FOUND]: We began producing hand sanitizer
+  352955_2020: The Company began directly managing its lands in 2017
+  829224_2020 [QUOTE NOT FOUND]: we accelerated the transformation of our store portfolio by expanding convenience-led formats
+  884269_2020: We have experienced a significant surge in customer demand for our proprietary N-95 Particulate Respirator face mask product and other personal protective equipment (“PPE”) products as a result of COVID-19.
+  1032220_2020: We performed new services to assist government clients in the U.S. in their COVID-19 response efforts.
+  1060219_2020: The Bank continues to leverage the drive-up windows in twelve of its fourteen branches as well as its electronic banking platform to continue to serve customers.
+  1065332_2020: In August 2020, we began offering new rapid and secure COVID-19 testing solution TourHealth
+  1071739_2020: We created a provider support program to assist our network providers who are seeking benefits from the Small Business Administration (SBA) through the CARES Act.
+  1109354_2020: SARS-COV-2 PCR tests
+  1116463_2020: During 2020, we began selling our saliva collection devices for use in molecular COVID-19 testing.
+  1309402_2020: We have also upgraded our York facility to include USP grade alcohol capabilities
+  1458412_2020: Supported our local businesses and communities by issuing $369 million of PPP loans to approximately 1,200 customers.
+  1674930_2020: Since March 2020, we have commercially launched several COVID-19 tests for the detection of SARS-CoV-2, the virus that causes COVID-19, including NGS and RT-PCR-based tests.
+
+panic_buying: 3/200 yes (1.5%), 95% range 0.5-4.3%, quotes not found in filing: 0
+  quote sections: Item 7 1, Item 1A 2, both 0, not found 0; available in Item 7: 33%; if this question wins: keep both sections (fewer than 5 usable yes quotes)
+  88948_2020: consumers began pantry loading and increasing their at-home consumption
+  1359687_2020: shortages experienced early in the COVID-19 pandemic
+  1739426_2020: We have experienced increased demand for certain of our products as customers increase stock as a precautionary measure during the pandemic.

@@ -1,0 +1,32 @@
+{
+  "seed": 2020,
+  "n_filings": 3000,
+  "n_pilot": 200,
+  "min_1a_words": 250,
+  "label_model": "claude-haiku-5-5",
+  "label_concurrency": 8,
+  "total_budget": 30,
+  "filings_path": "data/processed/filings.jsonl",
+  "sections": [
+    "item_1a",
+    "item_7"
+  ],
+  "chunk_words": 300,
+  "chunk_overlap": 50,
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "index_dir": "index/full",
+  "index_type": "flat",
+  "hnsw_m": 32,
+  "ef_construction": 200,
+  "ef_search": 2500,
+  "search_k": 2000,
+  "labels_path": "data/processed/labels_full_stay_home_boom_claude-haiku-5-5.jsonl",
+  "question_id": "stay_home_boom",
+  "judgment_budget": 1000,
+  "judge_depth": 25,
+  "amplify_cap": 25,
+  "amplify_k": 200,
+  "elites_per_branch": 1,
+  "breeder_model": "claude-haiku-5-5",
+  "max_generations": 20
+}
