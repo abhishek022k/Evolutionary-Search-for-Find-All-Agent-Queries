@@ -6,3 +6,4 @@ data/processed/
 index/
 *.pdf
 eval/runs/
+!reports/*.pdf
