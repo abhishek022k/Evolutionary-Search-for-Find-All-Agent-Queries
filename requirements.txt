@@ -6,3 +6,4 @@ huggingface_hub==2.4.0
 numpy==2.5.4
 PyStemmer==3.1.0
 sentence-transformers==6.2.0
+matplotlib==3.11.2
